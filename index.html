@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriPlan AI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+            <span>NutriPlan AI</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn-new">New Plan</button>
+            <button class="btn-history">History</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="form-container">
+            <div class="form-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15.9999V7.9999C20.9996 7.64918 20.9071 7.30471 20.7315 7.00106C20.556 6.69742 20.3037 6.44526 20 6.2699L13 2.2699C12.696 2.09437 12.3511 2.00195 12 2.00195C11.6489 2.00195 11.304 2.09437 11 2.2699L4 6.2699C3.69626 6.44526 3.44398 6.69742 3.26846 7.00106C3.09294 7.30471 3.00036 7.64918 3 7.9999V15.9999C3.00036 16.3506 3.09294 16.6951 3.26846 16.9987C3.44398 17.3024 3.69626 17.5545 4 17.7299L11 21.7299C11.304 21.9054 11.6489 21.9979 12 21.9979C12.3511 21.9979 12.696 21.9054 13 21.7299L20 17.7299C20.3037 17.5545 20.556 17.3024 20.7315 16.9987C20.9071 16.6951 20.9996 16.3506 21 15.9999Z"/>
+                    <path d="M3.27002 6.96L12 12.01L20.73 6.96"/>
+                    <path d="M12 22.08V12"/>
+                </svg>
+                <h2>Patient Nutrition Data</h2>
+            </div>
+
+            <form id="nutritionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select id="sex" name="sex" required>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birth_date">Birth Date</label>
+                        <input type="date" id="birth_date" name="birth_date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight_kg">Weight (kg)</label>
+                        <input type="number" id="weight_kg" name="weight_kg" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height_cm">Height (cm)</label>
+                        <input type="number" id="height_cm" name="height_cm" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="goal">Goal</label>
+                        <select id="goal" name="goal" required>
+                            <option value="lose fat">Lose Fat</option>
+                            <option value="gain weight">Gain Weight</option>
+                            <option value="maintain">Maintain</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 className="section-title mt-4">🥗 Diet</h2>
+                    </div>
+                    <form id="nutritionForm">
+                        <div class="form-grid">
+                
+                            <div className="form-group">
+                                <label htmlFor="dietType">Diet Type</label>
+                                <select id="dietType" className="form-control">
+                                    <option value="">Select</option>
+                                    <option value="Keto">Keto</option>
+                                    <option value="Vegan">Vegan</option>
+                                    <option value="Paleo">Paleo</option>
+                                    <option value="Mediterranean">Mediterranean</option>
+                                </select>
+                            </div>
+                            <div id="diet-details"></div> <!-- Optional: display response -->
+                    <div id="diet-details-mod"></div> <!-- Optional: display response -->
+                    <script>
+                        // Load diets list
+                        fetch('http://127.0.0.1:8000/diets/')
+    .then(response => response.json())
+    .then(data => {
+        const restrictionsSelect = document.getElementById('dietType');
+        restrictionsSelect.innerHTML = '<option value="" disabled selected>Select a diet</option>';
+
+        data.forEach(diet => {
+            const option = document.createElement('option');
+            option.value = diet;
+            option.textContent = diet;
+            restrictionsSelect.appendChild(option);
+        });
+
+        restrictionsSelect.addEventListener('change', event => {
+            const selectedDiet = encodeURIComponent(event.target.value);
+            fetch(`http://127.0.0.1:8000/diets/${selectedDiet}`)
+                .then(response => response.json())
+                .then(detail => {
+
+                    const detailsDiv = document.getElementById('diet-details');
+                    const detailsDivMod = document.getElementById('diet-details-mod');
+
+                    detailsDivMod.innerHTML = `
+                        <div class="macro-inputs">
+                            <div class="form-group">
+                                <label for="protein">Protein (${detail.protein})</label>
+                                <input type="number" id="protein" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="fat">Fat (${detail.fat})</label>
+                                <input type="number" id="fat" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="carbohydrates">Carbohydrates (${detail.carbohydrates})</label>
+                                <input type="number" id="carbohydrates" min="0" max="100">
+                            </div>
+                            <div id="macro-warning" style="color: red;"></div>
+                            
+                        </div>
+                    `;
+
+                    // Add listener AFTER elements are injected
+                    ['protein', 'fat', 'carbohydrates'].forEach(id => {
+                        document.getElementById(id).addEventListener('input', validateTotal);
+                    });
+
+                    function validateTotal() {
+                        const protein = Number(document.getElementById('protein').value) || 0;
+                        const fat = Number(document.getElementById('fat').value) || 0;
+                        const carbs = Number(document.getElementById('carbohydrates').value) || 0;
+                        const total = protein + fat + carbs;
+
+                        const warning = document.getElementById('macro-warning');
+                        if (total == 100) {
+                            warning.textContent = "";
+                        } else if (total > 100) {
+                            warning.textContent = 'Total percentage cannot exceed 100%';
+                        } else {
+                            const result = 100 - total;
+                            warning.textContent = result + '%'; // Adding the % symbol for clarity
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching diet detail:", error);
+                });
+        });
+    })
+    .catch(error => {
+        console.error('Error loading dietary restrictions:', error);
+        const restrictionsSelect = document.getElementById('restrictions');
+        restrictionsSelect.innerHTML = '<option value="" disabled>Failed to load restrictions</option>';
+    });
+
+                    </script>
+                            
+                            <div class="form-group full-width">
+                                <label for="restrictions">Dietary Restrictions (comma-separated)</label>
+                                <input type="text" id="restrictions" name="restrictions" placeholder="e.g., gluten, dairy, nuts">
+                            </div>
+                        </div>
+                    </form>
+        </div>
+                <button type="submit" class="submit-btn" onclick="submitForm(event)"></button>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3v18m0-18l-4 4m4-4l4 4"/>
+                    </svg>
+                    Generate Nutrition Plan
+                </button>
+                <script>
+                    function submitForm(event) {
+                        event.preventDefault();
+                        
+                        const formData = {
+                            name: document.getElementById('name').value,
+                            last_name: document.getElementById('last_name').value,
+                            sex: document.getElementById('sex').value,
+                            birth_date: document.getElementById('birth_date').value.split('-').reverse().join('/'),
+                            weight_kg: parseFloat(document.getElementById('weight_kg').value),
+                            height_cm: parseInt(document.getElementById('height_cm').value),
+                            goal: document.getElementById('goal').value
+                        };
+                        fetch('http://127.0.0.1:8000/patients/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            const arriaData = {
+                                patient: data,
+                                diet_type: document.getElementById('dietType').value,
+                                macros: {
+                                    protein: parseInt(document.getElementById('protein').value) || 0,
+                                    fat: parseInt(document.getElementById('fat').value) || 0,
+                                    carbohydrates: parseInt(document.getElementById('carbohydrates').value) || 0
+                                },
+                                restrictions: document.getElementById('restrictions').value.split(',').map(item => item.trim())
+                            };
+                            
+                            console.log(arriaData);
+                            return fetch('https://app.studio.arria.com:443/alite_content_generation_webapp/text/gbNoAd5Jb52', {//change to arria endpoint
+                                method: 'POST',
+                                headers: {
+                                    'Access-Control-Allow-Origin': 'http://localhost:8000',
+                                    'Authorization': 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJqdGkiOiJyelM0YjltNmF0cUI0T20wUjhhNk9zbW8iLCJpYXQiOjE3NDY0NDcyOTcsImV4cCI6MTkwNDEyNzI5NywiaXNzIjoiQUxpdGUiLCJzdWIiOiIxLTkwUDlVZFYzWmUiLCJBTGl0ZS5wZXJtIjpbInByczp4OmdiTm9BZDVKYjUyIl0sIkFMaXRlLnR0IjoidV9hIn0.UYkcP9kJo8BfKYZN3G22LTBLkzOAA5OtjmYG1_Ua4A7st7K2CHrO_XKZBIpKm4VUHPfoq_99rENVjyvuGl4G6w',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(arriaData)
+                            });
+                        })
+                        .then(response => response.json())
+                        .then(dietPlan => console.log('Diet plan created:', dietPlan))
+                        .catch(error => console.error('Error:', error));
+                        console.log(JSON.stringify(formData, null, 2));
+                        // You can now send this data to your backend
+                    }
+                </script>
+            </form>
+
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
