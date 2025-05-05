@@ -198,7 +198,7 @@
                             height_cm: parseInt(document.getElementById('height_cm').value),
                             goal: document.getElementById('goal').value
                         };
-                        fetch('http://127.0.0.1:8000/patients/', {
+                        fetch('https://nlg-nutribawl.vercel.app/patients/', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
